@@ -1,0 +1,205 @@
+Prompt Instruksi Lengkap: Pitocom E-commerce Platform
+"Buatkan struktur kode lengkap untuk aplikasi E-commerce bernama 'Pitocom' yang mengkhususkan diri pada penjualan PC (Desktop, Laptop), komponen PC, serta aksesoris terkait lainnya. Platform ini akan dibangun menggunakan Laravel 12 (PHP 8.5) untuk backend, Tailwind CSS untuk styling frontend, dan Alpine.js untuk interaktivitas dinamis. Desain keseluruhan harus elegan, modern, bersih, dan responsif, dengan fokus kuat pada pengalaman pengguna (UI/UX) yang intuitif dan menarik.
+
+1. Arsitektur & Autentikasi (Backend):
+Sistem Autentikasi: Implementasikan sistem autentikasi lengkap dengan dua peran pengguna: Admin dan Customer.
+
+Sediakan alur pendaftaran (register), masuk (login), dan keluar (logout) yang aman dan terpisah untuk kedua peran.
+
+Pastikan routing dan middleware yang sesuai untuk membatasi akses fitur Admin hanya untuk pengguna dengan peran Admin.
+
+Database Schema (migrations):
+
+Users Table: Standar Laravel dengan penambahan kolom role (enum: 'admin', 'customer').
+
+Products Table:
+
+id (PK)
+
+name (string) - Contoh: "Gaming PC RYZEN 7", "NVIDIA RTX 4080", "Logitech G Pro Mouse"
+
+slug (string, unique)
+
+description (text)
+
+brand (string) - Contoh: "ASUS", "Corsair", "Intel"
+
+category_id (FK to Categories table)
+
+base_price (decimal)
+
+stock (integer) - Bisa dihitung dari product_variations jika ada stok per variasi.
+
+image_path (string) - Path untuk gambar utama produk.
+
+is_featured (boolean, default false) - Untuk produk unggulan di halaman utama.
+
+created_at, updated_at
+
+Categories Table:
+
+id (PK)
+
+name (string, unique) - Contoh: "Gaming PC", "Laptop", "Graphics Card", "Monitor", "Keyboard", "Mouse"
+
+slug (string, unique)
+
+icon_path (string, nullable)
+
+parent_id (FK to Categories table, nullable) - Untuk nested categories.
+
+Product_Variations Table: (Untuk produk yang memiliki variasi seperti RAM, Storage, Warna, dll.)
+
+id (PK)
+
+product_id (FK to Products table)
+
+variation_name (string) - Contoh: "RAM 16GB", "SSD 512GB", "Warna Hitam", "Ukuran M"
+
+sku (string, unique, nullable) - Stock Keeping Unit
+
+additional_price (decimal, default 0) - Tambahan harga dari base_price produk.
+
+stock (integer) - Stok spesifik untuk variasi ini.
+
+Orders Table, Order_Items Table: (Minimal untuk riwayat pesanan user)
+
+Orders: user_id, total_amount, status (pending, completed, cancelled), order_date.
+
+Order_Items: order_id, product_id, product_variation_id (nullable), quantity, price_at_purchase.
+
+2. Modul Admin (CRUD):
+Dashboard Admin: Halaman utama untuk Admin yang menampilkan ringkasan data (jumlah produk, pesanan, user).
+
+Manajemen Produk (CRUD):
+
+Create: Form untuk menambah produk baru, termasuk nama, deskripsi, brand, kategori, harga dasar, gambar utama (dengan upload file), dan opsi untuk menambahkan variasi produk.
+
+Read: Tabel daftar produk dengan fitur pencarian, filter, dan paginasi.
+
+Update: Form yang telah diisi data produk untuk diedit, termasuk variasi yang sudah ada.
+
+Delete: Fitur untuk menghapus produk.
+
+Manajemen Kategori (CRUD): Fitur untuk menambah, melihat, mengedit, dan menghapus kategori produk.
+
+Manajemen Order: Melihat daftar pesanan, detail pesanan, dan mengubah status pesanan.
+
+3. Tampilan Antarmuka Pengguna (Frontend - UI/UX):
+Global Layout:
+
+Navbar: Logo "Pitocom", navigasi kategori, search bar, ikon keranjang belanja, ikon user (untuk login/register/profile).
+
+Footer: Informasi kontak, social media, kebijakan privasi, hak cipta.
+
+Welcome Page (/):
+
+Hero Section: Banner menarik dengan CTA (Call to Action) ke produk unggulan atau kategori populer.
+
+Featured Products: Grid produk unggulan (misal: "Produk Pilihan Pitocom") dengan gambar, nama, dan harga. Hover effect pada card produk.
+
+Category Showcase: Tampilkan beberapa kategori utama dengan ikon atau gambar menarik.
+
+Halaman Login (/login) & Register (/register): Form login/register yang bersih dan modern, menggunakan komponen Tailwind.
+
+Halaman Produk (Daftar Produk - /products atau /categories/{slug}):
+
+Tampilan grid responsif untuk daftar produk.
+
+Setiap card produk menampilkan gambar, nama, harga.
+
+Fitur filter berdasarkan kategori, brand, atau harga (jika memungkinkan).
+
+Paginasi untuk menampilkan produk dalam jumlah besar.
+
+Halaman Detail Produk (/products/{slug}):
+
+Gambar produk utama yang besar dan galeri gambar kecil.
+
+Nama produk, brand, deskripsi lengkap.
+
+Pemilihan Variasi Produk: Gunakan Alpine.js untuk memungkinkan pengguna memilih variasi (misal: RAM, SSD, Warna) secara dinamis.
+
+Saat variasi dipilih, harga yang ditampilkan (jika ada additional_price) dan ketersediaan stok harus diperbarui secara real-time tanpa reload halaman.
+
+Tombol "Add to Cart" yang aktif/non-aktif berdasarkan ketersediaan variasi.
+
+Dashboard User (/dashboard):
+
+Informasi profil pengguna.
+
+Daftar riwayat pesanan dengan status dan detail.
+
+Floating WhatsApp Button:
+
+Ikon WhatsApp melayang di pojok kanan bawah setiap halaman (kecuali halaman Admin).
+
+Gunakan Tailwind CSS untuk posisi fixed dan styling yang sesuai.
+
+Saat diklik, akan membuka tab baru ke https://wa.me/682281439842?text=Halo%20Pitocom,%20saya%20ingin%20bertanya%20tentang%20produk%20Anda. (Sertakan pesan default yang ramah).
+
+4. Teknologi & Styling:
+Laravel 12 (PHP 8.5): Manfaatkan fitur-fitur terbaru Laravel untuk efisiensi pengembangan (misalnya, Route Model Binding, Collection API).
+
+Tailwind CSS:
+
+Gunakan pendekatan utility-first untuk styling.
+
+Pilih palet warna profesional dan modern (misal: abu-abu (slate-), biru (sky- atau indigo-) untuk branding dan aksi, hijau (emerald-) untuk sukses, merah (rose-) untuk error).
+
+Pastikan desain responsif sepenuhnya untuk perangkat mobile, tablet, dan desktop.
+
+Alpine.js:
+
+Digunakan untuk interaksi sederhana tanpa perlu framework JS berat.
+
+Contoh implementasi: dropdown navigasi, modal login/register, tab info produk di detail, dan terutama untuk logika pemilihan variasi produk secara dinamis.
+
+Output yang Diharapkan:
+Migration Files: Untuk semua tabel yang disebutkan (users, products, categories, product_variations, orders, order_items).
+
+Model Files: Sesuai dengan tabel, lengkap dengan relasi Eloquent.
+
+Controller Files:
+
+AuthController (jika tidak menggunakan Breeze).
+
+Admin\ProductController (untuk CRUD produk).
+
+Admin\CategoryController (untuk CRUD kategori).
+
+Admin\OrderController (untuk manajemen pesanan).
+
+HomeController (untuk Welcome Page).
+
+ProductController (untuk menampilkan daftar produk dan detail).
+
+UserController (untuk dashboard user).
+
+Blade Template Files:
+
+layouts/app.blade.php (layout utama).
+
+auth/login.blade.php, auth/register.blade.php.
+
+welcome.blade.php.
+
+products/index.blade.php (daftar produk).
+
+products/show.blade.php (detail produk).
+
+dashboard/index.blade.php (user dashboard).
+
+admin/dashboard.blade.php.
+
+admin/products/index.blade.php, admin/products/create.blade.php, admin/products/edit.blade.php.
+
+admin/categories/index.blade.php, admin/categories/create.blade.php, admin/categories/edit.blade.php.
+
+admin/orders/index.blade.php, admin/orders/show.blade.php.
+
+Styling (Tailwind CSS): Contoh-contoh class Tailwind yang diterapkan pada elemen-elemen UI.
+
+JavaScript (Alpine.js): Contoh-contoh penggunaan x-data, x-bind, x-on, x-model untuk interaktivitas yang diminta.
+
+Tujuan akhirnya adalah sebuah platform e-commerce fungsional untuk Pitocom, yang tidak hanya solid di backend tetapi juga menarik dan mudah digunakan di frontend, dengan performa yang baik."
