@@ -18,6 +18,20 @@ return [
         'key' => env('POSTMARK_API_KEY'),
     ],
 
+    'rajaongkir' => [
+        'key' => env('RAJAONGKIR_API_KEY'),
+        'origin' => env('RAJAONGKIR_ORIGIN_CITY_ID', 153), // Default Jakarta Selatan (153)
+    ],
+
+    'midtrans' => [
+        'merchant_id' => env('MIDTRANS_MERCHANT_ID'),
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'is_production' => env('MIDTRANS_IS_PRODUCTION', false),
+        'is_sanitized' => true,
+        'is_3ds' => true,
+    ],
+
     'resend' => [
         'key' => env('RESEND_API_KEY'),
     ],

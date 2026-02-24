@@ -1,0 +1,60 @@
+Master Prompt: Pitocom UI/UX Overhaul (Light Mode & Animated CRUD)
+"Bertindaklah sebagai Senior Frontend Developer & UI/UX Expert. Saya memiliki proyek e-commerce bernama 'Pitocom' (penjualan PC & Komponen) yang dibangun dengan Laravel 12, PHP 8.5, Tailwind CSS, Alpine.js, dan MySQL.
+
+Tugas Utama:
+Lakukan pembaruan menyeluruh pada tampilan UI/UX menjadi sangat elegan, bersih, dan menarik dengan tema Light Mode. Tambahkan animasi halus pada setiap interaksi untuk meningkatkan kepuasan pengguna.
+
+⚠️ INSTRUKSI KHUSUS (WAJIB DIIKUTI):
+DILARANG mengubah logika controller, model, struktur database, atau alur data.
+
+DILARANG menghapus atau mengubah nama class, id, atau section yang sudah ada (hanya boleh menambahkan class baru).
+
+FOKUS pada estetika visual, transisi, dan interaktivitas menggunakan Tailwind dan Alpine.js.
+
+1. Konsep Visual: 'Pure & Professional Tech' (Light Mode)
+Background: Gunakan bg-slate-50 dengan aksen gradasi lembut dari white ke indigo-50/50.
+
+Card & Element: Gunakan bg-white dengan border sangat tipis border-slate-200/60 dan bayangan lembut shadow-sm.
+
+Typography: Gunakan font modern (Inter/Plus Jakarta Sans) dengan text-slate-800 untuk judul dan text-slate-500 untuk deskripsi.
+
+Glassmorphism: Terapkan backdrop-blur-md bg-white/70 pada Navbar untuk kesan premium.
+
+2. Animasi CRUD Interaktif (Alpine.js):
+CREATE/UPDATE: * Saat tombol simpan diklik, ubah tombol secara instan menjadi state loading dengan animasi animate-pulse dan teks 'Processing...'.
+
+Berikan animasi ring yang membesar halus saat input field difokuskan.
+
+READ (Display): * Gunakan efek Staggered Entrance: Munculkan list produk satu per satu dari bawah ke atas (fade-in-up) saat halaman dimuat atau discroll.
+
+DELETE: * Saat tombol hapus diklik, tampilkan modal konfirmasi dengan efek zoom-in dan animasi shake (getar) kecil.
+
+Setelah konfirmasi, berikan efek shrink (elemen mengecil) dan opacity-0 pada baris/card tersebut sebelum benar-benar hilang dari layar.
+
+3. Micro-Animations & Feedback:
+Hover Effects: Card produk harus terangkat sedikit (hover:-translate-y-2) dan bayangannya menebal (hover:shadow-xl) dengan durasi duration-300.
+
+Dynamic Cart: Buat ikon keranjang belanja bergerak (wiggle) kecil menggunakan Alpine.js setiap kali ada item baru masuk.
+
+Toast Notification: Gunakan Alpine.js untuk memunculkan notifikasi sukses di pojok kanan atas dengan transisi spring (membal) dan progress bar durasi di bawahnya.
+
+Floating WA Button: Berikan efek ring bercahaya yang berdenyut (ping) di belakang ikon WhatsApp hijau secara terus-menerus namun halus.
+
+4. Detail Halaman & Trust Signals:
+Welcome Page: Headline menggunakan gradient text (from-indigo-600 to-sky-500). Badge 'Flash Sale' berwarna rose-500 dengan animasi pulse halus.
+
+Skeleton Loading: Tampilkan efek 'shimmer' (kilatan cahaya) pada card produk saat data gambar sedang dimuat.
+
+Output yang Diharapkan:
+Berikan modifikasi file Blade Template yang hanya menambahkan class Tailwind dan atribut x-transition Alpine.js.
+
+Berikan script Alpine.js sederhana untuk menangani transisi masuk/keluar elemen (CRUD).
+
+Berikan konfigurasi tailwind.config.js tambahan jika diperlukan animasi custom (seperti keyframes shake atau wiggle)."
+
+Tips Tambahan Untukmu (Vito):
+Gunakan Shadow Indigo: Karena temanya Light Mode, gunakan bayangan dengan sedikit rona biru (shadow-indigo-500/10) agar terlihat lebih "tech" dan tidak kusam.
+
+Durasi Animasi: Pastikan durasi animasi (transition duration) berada di angka 200ms sampai 300ms. Jangan terlalu lama agar website tidak terasa berat atau "lemot".
+
+Koneksi ke Admin: Untuk dashboard Admin, pastikan sidebar menggunakan warna bg-white dengan border kanan yang tipis untuk menjaga konsistensi dengan halaman Welcome customer.

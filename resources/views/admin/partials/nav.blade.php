@@ -6,10 +6,30 @@
                class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.dashboard') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
                 Dashboard
             </a>
+
+            <a href="{{ route('admin.users.index') }}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.users.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
+                User Management
+            </a>
             
             <a href="{{ route('admin.products.index') }}" 
                class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.products.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
                 Manage Products
+            </a>
+
+            <a href="{{ route('admin.flash-sales.index') }}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.flash-sales.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
+                Flash Sales
+            </a>
+
+            <a href="{{ route('admin.bundles.index') }}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.bundles.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
+                Package Bundling
+            </a>
+
+            <a href="{{ route('admin.vouchers.index') }}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.vouchers.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
+                Voucher & Promo
             </a>
             
             <a href="{{ route('admin.categories.index') }}" 
@@ -20,6 +40,21 @@
             <a href="{{ route('admin.orders.index') }}" 
                class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.orders.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
                 Manage Orders
+            </a>
+
+            <a href="{{ route('admin.reviews.index') }}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.reviews.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
+                Manage Reviews
+            </a>
+
+            <a href="{{ route('admin.community-builds.index') }}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.community-builds.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
+                Build Moderation
+            </a>
+
+            <a href="{{ route('admin.crm.index') }}" 
+               class="px-5 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 {{ request()->routeIs('admin.crm.*') ? 'bg-slate-900 text-white shadow-lg shadow-slate-200' : 'text-slate-500 hover:text-sky-500 hover:bg-sky-50' }}">
+                CRM
             </a>
         </div>
 

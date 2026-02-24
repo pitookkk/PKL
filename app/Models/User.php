@@ -22,6 +22,10 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'phone_number',
+        'points',
+        'membership_level',
+        'total_spent',
     ];
 
     /**
@@ -38,6 +42,59 @@ class User extends Authenticatable
     public function isAdmin()
     {
         return $this->role === 'admin';
+    }
+
+    /**
+     * Get all reviews by the user.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Get the customer's hardware assets.
+     */
+    public function customerAssets()
+    {
+        return $this->hasMany(CustomerAsset::class);
+    }
+
+    /**
+     * Get the customer's service tickets.
+     */
+    public function serviceTickets()
+    {
+        return $this->hasMany(ServiceTicket::class);
+    }
+
+    /**
+     * Get the customer's loyalty points.
+     */
+    public function loyaltyPoint()
+    {
+        return $this->hasOne(LoyaltyPoint::class);
+    }
+
+    /**
+     * Get all wishlist items for the user.
+     */
+    public function wishlists()
+    {
+        return $this->hasMany(Wishlist::class);
+    }
+
+    /**
+     * Get all interaction logs for the user.
+     */
+    public function interactionLogs()
+    {
+        return $this->hasMany(InteractionLog::class);
+    }
+
+    public function communityBuilds()
+    {
+        return $this->hasMany(CommunityBuild::class);
     }
 
     /**

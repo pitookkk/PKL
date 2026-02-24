@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\CartItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -32,10 +33,11 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'customer', // Default role
+            'role' => 'user', 
         ]);
 
         Auth::login($user);
+        $this->syncSessionCartToDatabase();
 
         return redirect('/dashboard')->with('success', 'Registration successful.');
     }
@@ -60,6 +62,7 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
+            $this->syncSessionCartToDatabase();
 
             if (Auth::user()->isAdmin()) {
                 return redirect()->intended('admin/dashboard');
@@ -71,6 +74,34 @@ class AuthController extends Controller
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
+    }
+
+    /**
+     * Move items from session cart to database.
+     */
+    protected function syncSessionCartToDatabase()
+    {
+        $sessionCart = session()->get('cart', []);
+        
+        foreach ($sessionCart as $key => $details) {
+            if ($details['type'] === 'bundle') {
+                CartItem::updateOrCreate([
+                    'user_id' => Auth::id(),
+                    'bundle_id' => $details['bundle_id'],
+                    'type' => 'bundle'
+                ], ['quantity' => $details['quantity']]);
+            } else {
+                $ids = explode('-', $key);
+                CartItem::updateOrCreate([
+                    'user_id' => Auth::id(),
+                    'product_id' => $details['product_id'],
+                    'product_variation_id' => $ids[1] ?? null,
+                    'type' => 'product'
+                ], ['quantity' => $details['quantity']]);
+            }
+        }
+
+        session()->forget('cart');
     }
 
     /**

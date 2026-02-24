@@ -17,6 +17,15 @@ class Order extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'order_date' => 'datetime',
+    ];
+
+    /**
      * Get the user that placed the order.
      */
     public function user()

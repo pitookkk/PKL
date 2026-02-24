@@ -1,0 +1,90 @@
+==========================================================
+      DOKUMENTASI TEKNIS: PITOCOM E-COMMERCE & CRM
+==========================================================
+
+1. IKHTISAR SISTEM (SYSTEM OVERVIEW)
+------------------------------------
+Pitocom adalah platform e-commerce khusus hardware komputer yang 
+terintegrasi dengan sistem CRM (Customer Relationship Management) 
+dan layanan purna jual (Pitocom Care). Fokus utama platform ini 
+adalah membangun loyalitas pelanggan melalui pelacakan aset hardware, 
+pengingat servis otomatis, dan sistem poin.
+
+2. ARSITEKTUR DATA (DATABASE SCHEMA)
+------------------------------------
+
+A. Entitas Inti E-commerce:
+   - users: Data pengguna (customer/admin) + phone_number.
+   - products: Katalog hardware + fitur Flash Sale & Featured.
+   - product_variations: Variasi produk (RAM, Warna, dll) + stok/harga unik.
+   - categories: Kategori produk sistem nested (parent-child).
+   - orders & order_items: Data transaksi dan detail item.
+
+B. Entitas CRM & Pitocom Care:
+   - customer_assets: Hardware milik pelanggan + QR Code akses.
+   - maintenance_schedules: Jadwal servis berkala untuk aset.
+   - service_tickets: Sistem bantuan/komplain (Open/Closed/Priority).
+   - loyalty_points: Saldo poin belanja (1 poin / Rp 100.000).
+
+3. FITUR UTAMA & LOGIKA BISNIS
+------------------------------
+
+A. Sistem Transaksi:
+   - Cart: Menggunakan session, mendukung produk + variasi.
+   - Checkout: Menggunakan DB Transactions untuk integritas data.
+   - Review: Validasi ketat (Hanya untuk produk yang sudah dibeli & selesai).
+
+B. CRM & Otomatisasi:
+   - WhatsApp Service: Integrasi pengiriman pesan (simulasi via Log).
+   - Maintenance Reminder: Pengecekan jadwal harian via Console Command
+     untuk kirim notifikasi servis otomatis.
+   - Customer 360: Dashboard agregasi seluruh aktivitas user.
+   - Review Observer: Auto-recalculating average rating produk.
+
+4. STRUKTUR FOLDER KUNCI
+------------------------
+
+app/
+├── Console/Commands/       # Job schedule: SendMaintenanceReminders
+├── Http/Controllers/
+│   ├── Admin/              # Panel kendali: CRM, Flash Sale, Orders
+│   └── User/               # Fitur pelanggan: Support/Ticket
+├── Models/                 # Definisi relasi Eloquent (1:M, M:M)
+├── Observers/              # Automasi: ReviewObserver, OrderObserver
+└── Services/               # Logika Bisnis: WhatsApp, Points, Maintenance
+
+resources/views/
+├── admin/                  # Blade template Admin & CRM
+├── components/             # UI reusable (Trust Badges, WA Button)
+└── products/               # Template katalog & detail produk
+
+5. ALUR INTEGRASI (WORKFLOW)
+----------------------------
+
+A. Pembelian & Loyalitas:
+   Checkout -> Order Selesai -> PointSystemService (Hitung Poin) 
+   -> Asset Otomatis Terdaftar ke Akun User.
+
+B. Pengingat Servis:
+   Jadwal Reminder Tiba -> Cron Job (Artisan Command) 
+   -> MaintenanceService -> WhatsAppService -> Notifikasi ke User.
+
+6. PANDUAN PENGEMBANGAN
+-----------------------
+
+A. Integrasi WhatsApp:
+   Edit 'app/Services/WhatsAppService.php' untuk mengganti provider API.
+
+B. Menjalankan Scheduler:
+   Tambahkan cron job: * * * * * php artisan schedule:run
+
+7. KEAMANAN & INTEGRITAS
+------------------------
+- Proteksi AdminMiddleware pada rute sensitif.
+- Foreign Key Constraints pada database untuk mencegah data korup.
+- Proteksi CSRF dan Validasi input pada setiap form.
+
+----------------------------------------------------------
+Dokumentasi dibuat pada: Jum'at, 20 Februari 2026
+Project: Pitocom E-commerce
+----------------------------------------------------------
