@@ -6,8 +6,9 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage; // Tambahkan ini untuk hapus file
-use Illuminate\Support\Str; // Tambahkan ini untuk generate slug
+use Illuminate\Support\Facades\Http; // Tambahkan Facade Http untuk koneksi n8n
+use Illuminate\Support\Facades\Storage; 
+use Illuminate\Support\Str; 
 
 class ProductController extends Controller
 {
@@ -57,13 +58,15 @@ class ProductController extends Controller
         $reviews = $product->reviews()->with('user')->latest()->paginate(5);
 
         $isInWishlist = false;
-        if (Auth::check()) {
-            $isInWishlist = Auth::user()->wishlists()->where('product_id', $product->id)->exists();
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+        
+        if ($user) {
+            $isInWishlist = $user->wishlists()->where('product_id', $product->id)->exists();
         }
 
-        // Perbaikan garis merah VS Code dengan Auth Facade
-        $reviewedProductIds = Auth::check() 
-            ? Auth::user()->reviews()->pluck('product_id') 
+        $reviewedProductIds = $user 
+            ? $user->reviews()->pluck('product_id') 
             : collect();
 
         return view('products.show', compact('product', 'reviews', 'reviewedProductIds', 'isInWishlist'));
@@ -81,21 +84,18 @@ class ProductController extends Controller
             'stock' => 'required|integer',
             'category_id' => 'required|exists:categories,id',
             'brand' => 'nullable|string',
-            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048', // Nama input 'image' sesuai form create
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'is_featured' => 'nullable|boolean',
         ]);
 
-        // Generate Slug otomatis dari nama produk
         $data['slug'] = Str::slug($request->name) . '-' . time();
 
-        // Simpan Gambar
         if ($request->hasFile('image')) {
             $data['image_path'] = $request->file('image')->store('products', 'public');
         }
 
         Product::create($data);
 
-        // Kirim notifikasi sukses melayang
         return redirect()->route('admin.products.index')
             ->with('success', 'Produk hardware baru berhasil ditambahkan ke katalog Pitocom!');
     }
@@ -117,7 +117,6 @@ class ProductController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Hapus gambar lama jika ada
             if ($product->image_path) {
                 Storage::disk('public')->delete($product->image_path);
             }
@@ -143,5 +142,22 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Produk telah dihapus secara permanen dari sistem.');
+    }
+
+    /**
+     * Fungsi Uji Coba Integrasi n8n untuk PITOCOM.
+     */
+    public function kirimKeN8n() 
+    {
+        // Pastikan URL di bawah ini sesuai dengan URL Webhook di Dashboard n8n kamu
+        $response = Http::post('https://pitookk.app.n8n.cloud/webhook/0d8f6668-e015-40e8-ba7c-4839f6abf64d', [
+            'nama_produk' => 'VGA RTX 4060 PITOCOM',
+            'harga' => 5000000,
+            'stok_sisa' => 3,
+            'kategori' => 'Hardware',
+            'dikirim_oleh' => 'Vito Aditya'
+        ]);
+
+        return "Status n8n: " . $response->status() . " | Data telah dikirim ke website n8n!";
     }
 }

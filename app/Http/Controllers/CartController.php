@@ -35,12 +35,12 @@ class CartController extends Controller
                     ];
                     $total += $item->bundle->price * $item->quantity;
                 } elseif ($item->product) {
-                    $price = $item->product->current_price;
+                    $price = (float)$item->product->current_price;
                     $variationName = null;
                     $key = (string) $item->product_id;
 
                     if ($item->product_variation_id && $item->variation) {
-                        $price += $item->variation->additional_price;
+                        $price += (float)$item->variation->additional_price;
                         $variationName = $item->variation->variation_name;
                         $key .= '-' . $item->product_variation_id;
                     }
@@ -48,7 +48,7 @@ class CartController extends Controller
                     $cart[$key] = [
                         "name" => $item->product->name,
                         "quantity" => $item->quantity,
-                        "price" => (float) $price,
+                        "price" => $price,
                         "image" => $item->product->image_path,
                         "variation_name" => $variationName,
                         "type" => "product",
@@ -81,29 +81,48 @@ class CartController extends Controller
         ]);
 
         $type = $request->input('type', 'product');
-        $qty = $request->quantity;
+        $qty = (int)$request->quantity;
 
         if (Auth::check()) {
             // --- DATABASE LOGIC ---
             if ($type === 'bundle') {
                 $bundle = Bundle::findOrFail($id);
-                $item = CartItem::firstOrNew([
-                    'user_id' => Auth::id(),
-                    'bundle_id' => $id,
-                    'type' => 'bundle'
-                ]);
-                $item->quantity += $item->exists ? $qty : ($qty - 1);
-                $item->save();
+                $item = CartItem::where('user_id', Auth::id())
+                    ->where('bundle_id', $id)
+                    ->where('type', 'bundle')
+                    ->first();
+
+                if ($item) {
+                    $item->quantity += $qty;
+                    $item->save();
+                } else {
+                    CartItem::create([
+                        'user_id' => Auth::id(),
+                        'bundle_id' => $id,
+                        'type' => 'bundle',
+                        'quantity' => $qty
+                    ]);
+                }
             } else {
                 $product = Product::findOrFail($id);
-                $item = CartItem::firstOrNew([
-                    'user_id' => Auth::id(),
-                    'product_id' => $id,
-                    'product_variation_id' => $request->variation_id,
-                    'type' => 'product'
-                ]);
-                $item->quantity += $item->exists ? $qty : ($qty - 1);
-                $item->save();
+                $item = CartItem::where('user_id', Auth::id())
+                    ->where('product_id', $id)
+                    ->where('product_variation_id', $request->variation_id)
+                    ->where('type', 'product')
+                    ->first();
+
+                if ($item) {
+                    $item->quantity += $qty;
+                    $item->save();
+                } else {
+                    CartItem::create([
+                        'user_id' => Auth::id(),
+                        'product_id' => $id,
+                        'product_variation_id' => $request->variation_id,
+                        'type' => 'product',
+                        'quantity' => $qty
+                    ]);
+                }
             }
         } else {
             // --- SESSION LOGIC (Fallback for guests) ---
@@ -117,7 +136,7 @@ class CartController extends Controller
                     $cart[$key] = [
                         "name" => "[BUNDLE] " . $bundle->name, 
                         "quantity" => $qty, 
-                        "price" => (float)$bundle->price, // Price set here
+                        "price" => (float)$bundle->price,
                         "image" => $bundle->image_path, 
                         "type" => "bundle", 
                         "bundle_id" => $id
@@ -127,7 +146,6 @@ class CartController extends Controller
                 $product = Product::findOrFail($id);
                 $key = $request->variation_id ? $id . '-' . $request->variation_id : (string)$id;
                 
-                // Calculate correct price for session
                 $price = (float)$product->current_price;
                 $vName = null;
                 if ($request->variation_id) {
@@ -142,7 +160,7 @@ class CartController extends Controller
                     $cart[$key] = [
                         "name" => $product->name, 
                         "quantity" => $qty, 
-                        "price" => $price, // Price set here
+                        "price" => $price, 
                         "image" => $product->image_path, 
                         "variation_name" => $vName, 
                         "type" => "product", 
@@ -164,8 +182,6 @@ class CartController extends Controller
         $request->validate(['quantity' => 'required|integer|min:1']);
 
         if (Auth::check()) {
-            // Database update
-            // Note: $cartItemId here needs to be handled carefully if it's string key
             if (str_starts_with($cartItemId, 'bundle-')) {
                 $id = str_replace('bundle-', '', $cartItemId);
                 CartItem::where('user_id', Auth::id())->where('bundle_id', $id)->update(['quantity' => $request->quantity]);
@@ -176,7 +192,6 @@ class CartController extends Controller
                 $query->update(['quantity' => $request->quantity]);
             }
         } else {
-            // Session update
             $cart = session()->get('cart');
             if (isset($cart[$cartItemId])) {
                 $cart[$cartItemId]['quantity'] = $request->quantity;

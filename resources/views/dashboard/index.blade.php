@@ -10,6 +10,15 @@
         <p class="text-slate-500 font-medium text-left">Selamat datang kembali, kelola profil dan pantau pesananmu di sini.</p>
     </div>
 
+    @if (session('success'))
+        <div class="mb-8 p-6 bg-emerald-50 border border-emerald-100 rounded-[2rem] flex items-center space-x-4 animate-fade-in-up">
+            <div class="w-10 h-10 bg-emerald-500 text-white rounded-xl flex items-center justify-center shadow-lg shadow-emerald-100">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            </div>
+            <p class="font-bold text-emerald-800">{{ session('success') }}</p>
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
         {{-- User Profile Card --}}
         <div class="lg:col-span-1">
@@ -28,11 +37,17 @@
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Email Address</p>
                         <p class="font-bold text-slate-800 lowercase">{{ $user->email }}</p>
                     </div>
+                    @if($user->phone_number)
+                    <div class="p-4 bg-slate-50 rounded-2xl">
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Phone Number</p>
+                        <p class="font-bold text-slate-800">{{ $user->phone_number }}</p>
+                    </div>
+                    @endif
                 </div>
 
-                <button class="w-full mt-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm hover:bg-sky-500 transition-all active:scale-95 shadow-xl shadow-slate-200">
+                <a href="{{ route('profile.edit') }}" class="block w-full mt-8 py-4 bg-slate-900 text-white rounded-2xl font-black text-sm hover:bg-sky-500 transition-all active:scale-95 shadow-xl shadow-slate-200 text-center">
                     Edit Profile
-                </button>
+                </a>
             </div>
         </div>
         

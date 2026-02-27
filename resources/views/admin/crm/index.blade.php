@@ -1,132 +1,190 @@
 @extends('layouts.app')
 
-@section('title', 'Customer Management - Pitocom Admin')
+@section('title', 'CRM Hub - Pitocom Admin')
 
 @section('content')
-    {{-- Load Font Premium --}}
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <style> body { font-family: 'Plus Jakarta Sans', sans-serif; } </style>
-
     {{-- Navbar Admin --}}
     @include('admin.partials.nav')
-    
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-    
-    {{-- CRM Navigation --}}
-    <div class="mb-10">
-        @include('admin.crm.partials.navbar')
-    </div>
 
-    {{-- Header Section --}}
-    <div class="mb-10 text-left animate-fade-in-up">
-        <h1 class="text-4xl font-black text-slate-900 tracking-tight">Customer <span class="text-sky-500">Management</span></h1>
-        <p class="text-slate-500 mt-2 font-medium text-lg">Kelola data pelanggan, pantau loyalitas, dan lihat riwayat belanja Pitocom.</p>
-        <div class="h-1.5 w-24 bg-sky-500 mt-4 rounded-full"></div>
-    </div>
+<style> 
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    
+    .reveal-section {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .reveal-section.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
 
-    <div class="mb-10 bg-white p-8 rounded-[2rem] border border-slate-100 shadow-sm">
-        <form action="{{ route('admin.crm.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+
+<div class="max-w-[1600px] mx-auto px-6 sm:px-10 py-10" 
+     x-data="{ 
+        show: false,
+        initObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal-section').forEach(el => observer.observe(el));
+        }
+     }" x-init="initObserver(); setTimeout(() => show = true, 100)">
+    
+    {{-- CRM Header Hub --}}
+    <div class="reveal-section mb-12">
+        <div class="mb-10">
+            @include('admin.crm.partials.navbar')
+        </div>
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-8 text-left">
             <div>
-                <label for="level" class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Membership Level</label>
-                <select name="level" id="level" class="w-full px-5 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-sky-500 font-bold text-slate-700 transition-all cursor-pointer">
-                    <option value="">All Levels</option>
+                <h1 class="text-5xl font-black text-slate-900 tracking-tighter uppercase">Customer <span class="text-sky-500">Management.</span></h1>
+                <p class="text-slate-500 mt-3 font-medium text-lg italic pl-1">Kelola data pelanggan, pantau loyalitas, dan lihat riwayat belanja Pitocom.</p>
+                <div class="h-1.5 w-24 bg-sky-500 mt-6 rounded-full"></div>
+            </div>
+            
+            {{-- Search/Summary Stats (Optional visual) --}}
+            <div class="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex items-center space-x-6">
+                <div class="text-center px-4">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Database</p>
+                    <p class="text-xl font-black text-slate-900">{{ number_format($customers->total()) }}</p>
+                </div>
+                <div class="w-px h-8 bg-slate-100"></div>
+                <div class="text-center px-4">
+                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Growth</p>
+                    <p class="text-xl font-black text-emerald-500">+12%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Filter Console --}}
+    <div class="reveal-section mb-10 bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm" style="transition-delay: 150ms">
+        <form action="{{ route('admin.crm.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-12 gap-8 items-end">
+            <div class="md:col-span-4 text-left">
+                <label for="level" class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Membership Tier</label>
+                <select name="level" id="level" class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-sky-500 font-bold text-slate-700 shadow-inner appearance-none cursor-pointer">
+                    <option value="">All Membership Levels</option>
                     <option value="Silver" @selected(isset($filters['level']) && $filters['level'] == 'Silver')>Silver Member</option>
                     <option value="Gold" @selected(isset($filters['level']) && $filters['level'] == 'Gold')>Gold Member</option>
                     <option value="Platinum" @selected(isset($filters['level']) && $filters['level'] == 'Platinum')>Platinum Member</option>
                 </select>
             </div>
-            <div>
-                <label for="sort_spent" class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2 ml-1">Sort by Spending</label>
-                <select name="sort_spent" id="sort_spent" class="w-full px-5 py-3 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-sky-500 font-bold text-slate-700 transition-all cursor-pointer">
-                    <option value="">Default (Terbaru)</option>
-                    <option value="desc" @selected(isset($filters['sort_spent']) && $filters['sort_spent'] == 'desc')>High to Low (Sultan)</option>
-                    <option value="asc" @selected(isset($filters['sort_spent']) && $filters['sort_spent'] == 'asc')>Low to High</option>
+            
+            <div class="md:col-span-4 text-left">
+                <label for="sort_spent" class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3 ml-1">Spending Logic</label>
+                <select name="sort_spent" id="sort_spent" class="w-full px-6 py-4 bg-slate-50 border-none rounded-2xl focus:ring-2 focus:ring-sky-500 font-bold text-slate-700 shadow-inner appearance-none cursor-pointer">
+                    <option value="">Default (Join Date)</option>
+                    <option value="desc" @selected(isset($filters['sort_spent']) && $filters['sort_spent'] == 'desc')>Revenue: High to Low (Sultan)</option>
+                    <option value="asc" @selected(isset($filters['sort_spent']) && $filters['sort_spent'] == 'asc')>Revenue: Low to High</option>
                 </select>
             </div>
-            <div class="flex gap-3">
-                <button type="submit" class="flex-1 px-8 py-3 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-sky-500 transition-all shadow-lg shadow-slate-200 active:scale-95 text-sm">
-                    Apply Filter
+
+            <div class="md:col-span-4 flex gap-3">
+                <button type="submit" class="flex-1 py-4 bg-slate-900 text-white rounded-2xl font-black uppercase tracking-widest hover:bg-sky-500 transition-all shadow-xl shadow-slate-200 active:scale-95 text-xs">
+                    Apply Analytics
                 </button>
-                <a href="{{ route('admin.crm.index') }}" class="px-6 py-3 bg-slate-100 text-slate-400 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all text-sm flex items-center justify-center">
+                <a href="{{ route('admin.crm.index') }}" class="px-8 py-4 bg-slate-100 text-slate-400 rounded-2xl font-black uppercase tracking-widest hover:bg-slate-200 transition-all text-xs flex items-center justify-center">
                     Reset
                 </a>
             </div>
         </form>
     </div>
 
-
-    <div class="bg-white rounded-[2.5rem] shadow-sm overflow-hidden border border-slate-100">
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-slate-100">
+    {{-- Main Table Section --}}
+    <div class="reveal-section bg-white rounded-[3.5rem] shadow-sm border border-slate-100 overflow-hidden mb-20" style="transition-delay: 300ms">
+        <div class="overflow-x-auto no-scrollbar">
+            <table class="min-w-full divide-y divide-slate-50 table-fixed">
                 <thead class="bg-slate-50/50">
                     <tr>
-                        <th class="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Customer</th>
-                        <th class="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Membership</th>
-                        <th class="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Total Spent</th>
-                        <th class="px-8 py-5 text-left text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Loyalty Points</th>
-                        <th class="px-8 py-5 text-right text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Actions</th>
+                        <th class="w-80 px-10 py-7 text-left text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">Customer Profile</th>
+                        <th class="w-48 px-10 py-7 text-left text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">Membership</th>
+                        <th class="w-56 px-10 py-7 text-left text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">Total Life-Time Spent</th>
+                        <th class="w-48 px-10 py-7 text-left text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">Loyalty Engine</th>
+                        <th class="w-44 px-10 py-7 text-right text-[11px] font-black text-slate-400 uppercase tracking-[0.25em]">Intelligence</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse ($customers as $customer)
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="px-8 py-6 whitespace-nowrap">
+                <tbody class="divide-y divide-slate-50 bg-white">
+                    @forelse ($customers as $index => $customer)
+                        <tr class="hover:bg-slate-50/30 transition-all group"
+                            x-show="show"
+                            x-transition:enter="transition ease-out duration-500"
+                            x-transition:enter-start="opacity-0 translate-y-4"
+                            x-transition:enter-end="opacity-100 translate-y-0"
+                            style="display: none; --row-delay: {{ $index * 50 }}ms; transition-delay: var(--row-delay);">
+                            
+                            {{-- Customer --}}
+                            <td class="px-10 py-8 whitespace-nowrap">
                                 <div class="flex items-center">
-                                    <div class="h-10 w-10 rounded-xl bg-sky-500 flex items-center justify-center font-black text-white text-sm shadow-sm shadow-sky-100 mr-4">
+                                    <div class="h-12 w-12 rounded-2xl bg-slate-900 flex items-center justify-center font-black text-white text-lg shadow-lg group-hover:bg-sky-500 transition-colors mr-5 shrink-0">
                                         {{ substr($customer->name, 0, 1) }}
                                     </div>
-                                    <div>
-                                        <div class="text-sm font-black text-slate-900">{{ $customer->name }}</div>
-                                        <div class="text-[11px] text-slate-400 font-bold tracking-tight">{{ $customer->email }}</div>
+                                    <div class="truncate">
+                                        <div class="text-base font-black text-slate-900 tracking-tight">{{ $customer->name }}</div>
+                                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">{{ $customer->email }}</div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-8 py-6 whitespace-nowrap">
+
+                            {{-- Rank --}}
+                            <td class="px-10 py-8 whitespace-nowrap">
                                 @php
                                     $level = $customer->membership_level;
-                                    $badgeStyle = match($level) {
-                                        'Platinum' => 'bg-indigo-100 text-indigo-600 border-indigo-200',
-                                        'Gold' => 'bg-amber-100 text-amber-600 border-amber-200',
-                                        default => 'bg-slate-100 text-slate-400 border-slate-200',
+                                    $rankStyle = match($level) {
+                                        'Platinum' => 'bg-indigo-50 text-indigo-600 border-indigo-100',
+                                        'Gold' => 'bg-amber-50 text-amber-600 border-amber-100',
+                                        default => 'bg-slate-50 text-slate-400 border-slate-100',
                                     };
                                 @endphp
-                                <span class="px-4 py-1.5 text-[10px] font-black rounded-full border {{ $badgeStyle }} uppercase tracking-widest shadow-sm">
+                                <span class="inline-flex px-5 py-2 text-[9px] font-black rounded-full border {{ $rankStyle }} uppercase tracking-[0.15em] shadow-sm">
                                     {{ $level }}
                                 </span>
                             </td>
-                            <td class="px-8 py-6 whitespace-nowrap text-sm font-black text-emerald-500 tracking-tight text-left">
-                                Rp {{ number_format($customer->total_spent, 0, ',', '.') }}
+
+                            {{-- Spending --}}
+                            <td class="px-10 py-8 whitespace-nowrap text-left text-left">
+                                <p class="text-lg font-black text-emerald-500 tracking-tighter leading-none">Rp{{ number_format($customer->total_spent, 0, ',', '.') }}</p>
+                                <p class="text-[8px] text-slate-300 font-black uppercase tracking-widest mt-2">Gross Revenue Assets</p>
                             </td>
-                            <td class="px-8 py-6 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <span class="text-sm font-black text-slate-700 mr-2">{{ number_format($customer->points, 0, ',', '.') }}</span>
-                                    <span class="text-[9px] font-black text-slate-300 uppercase tracking-tighter">Pts</span>
+
+                            {{-- Points --}}
+                            <td class="px-10 py-8 whitespace-nowrap">
+                                <div class="flex items-center text-left text-left">
+                                    <span class="text-lg font-black text-slate-800 tracking-tighter mr-2">{{ number_format($customer->points, 0, ',', '.') }}</span>
+                                    <div class="px-2 py-0.5 bg-slate-100 rounded text-[8px] font-black text-slate-400 uppercase">PTS</div>
+                                </div>
+                                <div class="w-24 bg-slate-50 h-1 rounded-full mt-2 overflow-hidden shadow-inner text-left">
+                                    <div class="bg-sky-500 h-full w-2/3"></div>
                                 </div>
                             </td>
-                            <td class="px-8 py-6 whitespace-nowrap text-right text-sm font-medium">
+
+                            {{-- Actions --}}
+                            <td class="px-10 py-8 whitespace-nowrap text-right">
                                 <a href="{{ route('admin.crm.customer360', $customer) }}" 
-                                   class="inline-flex items-center px-6 py-2 bg-slate-50 text-sky-500 rounded-xl font-black text-[11px] uppercase tracking-widest hover:bg-sky-500 hover:text-white transition-all shadow-sm">
+                                   class="inline-flex items-center px-6 py-3 bg-slate-900 text-white rounded-xl font-black text-[9px] uppercase tracking-[0.2em] hover:bg-sky-500 transition-all shadow-xl shadow-slate-100 active:scale-90">
                                     View 360&deg; Profile
                                 </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-8 py-20 text-center text-slate-400 font-bold italic bg-slate-50/20">
-                                <svg class="w-12 h-12 mx-auto text-slate-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                                Data pelanggan tidak ditemukan dengan filter tersebut.
+                            <td colspan="5" class="px-10 py-40 text-center bg-slate-50/20 text-left text-left text-left text-left">
+                                <div class="text-6xl mb-6 grayscale opacity-20 text-left text-left text-left text-left text-left">👤</div>
+                                <p class="text-slate-300 font-black uppercase tracking-[0.3em] text-xs text-left text-left text-left text-left text-left">Zero customer records detected</p>
                             </td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
         </div>
+        
+        <div class="px-10 py-10 bg-slate-50/30 border-t border-slate-50 text-left text-left">
+            {{ $customers->links() }}
+        </div>
     </div>
-    
-    {{-- Pagination bergaya Pitocom --}}
-    <div class="mt-10">
-        {{ $customers->links() }}
-    </div>
-
 </div>
 @endsection

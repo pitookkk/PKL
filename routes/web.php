@@ -19,6 +19,7 @@ use App\Http\Controllers\BundleController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\ReviewController;
@@ -36,6 +37,8 @@ Route::post('/payments/midtrans-callback', [PaymentCallbackController::class, 'h
 
 // Welcome Page
 Route::get('/', [HomeController::class, 'index'])->name('welcome');
+
+Route::get('/tes-n8n', [ProductController::class, 'kirimKeN8n']);
 
 // Public Asset View Route (for QR Codes)
 Route::get('/assets/{customerAsset}', [CustomerAssetController::class, 'show'])->name('customer-assets.show');
@@ -68,6 +71,10 @@ Route::get('/categories/{category:slug}', [ProductController::class, 'index'])->
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
+    // Profile Routes
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
     // Cart Routes
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     Route::post('/cart/add/{product}', [CartController::class, 'add'])->name('cart.add');
@@ -105,6 +112,8 @@ Route::middleware('auth')->group(function () {
 
     // Invoice
     Route::get('/orders/{order}/invoice', [InvoiceController::class, 'download'])->name('orders.invoice');
+
+    
 });
 
 

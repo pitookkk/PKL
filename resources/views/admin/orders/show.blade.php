@@ -3,132 +3,176 @@
 @section('title', "Order #{$order->id} Details - Pitocom Admin")
 
 @section('content')
+    {{-- Navbar Admin --}}
     @include('admin.partials.nav')
 
-    <div class="max-w-7xl mx-auto px-4 py-10">
-        {{-- Header & Back Button --}}
-        <div class="mb-10 animate-fade-in-up text-left">
-            <a href="{{ route('admin.orders.index') }}" class="inline-flex items-center text-sm font-bold text-sky-500 hover:text-sky-600 transition mb-4">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                Back to All Orders
-            </a>
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <h1 class="text-4xl font-black text-slate-900 tracking-tight">Order #{{ $order->id }}</h1>
+<style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    
+    .reveal-section {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .reveal-section.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+</style>
+
+<div class="max-w-[1600px] mx-auto px-6 sm:px-10 py-10" 
+     x-data="{ 
+        initObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+            }, { threshold: 0.1 });
+            document.querySelectorAll('.reveal-section').forEach(el => observer.observe(el));
+        }
+     }" x-init="initObserver()">
+    
+    {{-- Header & Back Hub --}}
+    <div class="reveal-section mb-12 text-left">
+        <a href="{{ route('admin.orders.index') }}" class="inline-flex items-center text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] hover:text-indigo-500 transition-colors mb-6 group">
+            <svg class="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M15 19l-7-7 7-7"/></svg>
+            Back to Logistics Hub
+        </a>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="text-left">
+                <h1 class="text-5xl font-black text-slate-900 tracking-tighter uppercase">Order <span class="text-indigo-600">#{{ $order->id }}.</span></h1>
+                <p class="text-slate-500 mt-2 font-medium text-lg italic pl-1">Data record transaksi pelanggan pada sistem Pitocom.</p>
+            </div>
+            
+            @php
+                $statusStyles = [
+                    'pending' => 'bg-amber-50 text-amber-500 border-amber-100',
+                    'completed' => 'bg-emerald-50 text-emerald-500 border-emerald-100',
+                    'cancelled' => 'bg-rose-50 text-rose-500 border-rose-100',
+                ];
+                $currentStyle = $statusStyles[$order->status] ?? 'bg-slate-50 text-slate-400 border-slate-100';
+            @endphp
+            <div class="px-8 py-4 rounded-3xl border {{ $currentStyle }} shadow-sm text-center">
+                <p class="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">System Status</p>
+                <p class="text-sm font-black uppercase tracking-widest mt-1">{{ $order->status }}</p>
+            </div>
+        </div>
+        <div class="h-1.5 w-24 bg-indigo-500 mt-8 rounded-full text-left"></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {{-- Left Column: Order Items --}}
+        <div class="lg:col-span-2 space-y-10 text-left">
+            <div class="reveal-section bg-white p-10 lg:p-12 rounded-[3.5rem] shadow-sm border border-slate-100 relative overflow-hidden group">
+                <div class="absolute -right-6 -top-6 bg-indigo-500/5 w-32 h-32 rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
                 
-                @php
-                    $statusStyles = [
-                        'pending' => 'bg-amber-50 text-amber-600 border-amber-100',
-                        'completed' => 'bg-emerald-50 text-emerald-600 border-emerald-100',
-                        'cancelled' => 'bg-red-50 text-red-600 border-red-100',
-                    ];
-                    $currentStyle = $statusStyles[$order->status] ?? 'bg-slate-50 text-slate-600 border-slate-100';
-                @endphp
-                <span class="inline-block px-6 py-2 rounded-full border {{ $currentStyle }} text-xs font-black uppercase tracking-[0.2em]">
-                    Status: {{ $order->status }}
-                </span>
+                <h2 class="text-xs font-black text-slate-900 uppercase tracking-[0.4em] mb-12 flex items-center relative">
+                    <span class="bg-slate-900 text-white p-2.5 rounded-xl mr-4 shadow-lg">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+                    </span>
+                    Invoiced Assets List
+                </h2>
+                
+                <div class="divide-y divide-slate-50 relative">
+                    @foreach($order->items as $index => $item)
+                    <div class="py-8 flex flex-col md:flex-row items-center justify-between group first:pt-0 reveal-section" style="--item-delay: {{ $index * 100 }}ms; transition-delay: var(--item-delay);">
+                        <div class="flex items-center space-x-8 text-left">
+                            <div class="w-24 h-24 bg-slate-50 rounded-3xl overflow-hidden border border-slate-100 shadow-inner group-hover:rotate-3 transition-all duration-500 shrink-0">
+                                <img src="{{ $item->product->image_path ? asset('storage/' . $item->product->image_path) : 'https://via.placeholder.com/150' }}" 
+                                     class="w-full h-full object-cover">
+                            </div>
+                            <div class="text-left text-left">
+                                <p class="font-black text-slate-900 text-xl tracking-tight leading-tight mb-2">{{ $item->product->name }}</p>
+                                @if($item->variation)
+                                    <span class="inline-block px-3 py-1 bg-indigo-50 text-indigo-500 text-[10px] font-black uppercase rounded-lg border border-indigo-100 shadow-sm text-left">
+                                        {{ $item->variation->variation_name }}
+                                    </span>
+                                @endif
+                                <div class="mt-3 flex items-center space-x-4 text-left">
+                                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest text-left">Unit Qty: <span class="text-slate-900 ml-1">{{ $item->quantity }}</span></p>
+                                    <div class="w-1 h-1 bg-slate-200 rounded-full"></div>
+                                    <p class="text-xs text-slate-400 font-bold uppercase tracking-widest text-left">MSRP: <span class="text-slate-900 ml-1">Rp{{ number_format($item->price_at_purchase, 0, ',', '.') }}</span></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right mt-6 md:mt-0">
+                            <p class="text-2xl font-black text-indigo-600 tracking-tighter">Rp{{ number_format($item->price_at_purchase * $item->quantity, 0, ',', '.') }}</p>
+                            <p class="text-[9px] text-slate-300 font-black uppercase tracking-[0.2em] mt-1.5">Item Purchase Total</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {{-- Order Items List --}}
-            <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <h2 class="text-2xl font-black text-slate-900 mb-8 flex items-center">
-                        <svg class="w-6 h-6 mr-3 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-                        Order Items
-                    </h2>
-                    
-                    <div class="divide-y divide-slate-50">
-                        @foreach($order->items as $item)
-                        <div class="py-6 flex flex-col md:flex-row items-center justify-between group first:pt-0">
-                            <div class="flex items-center space-x-6">
-                                <div class="w-20 h-20 bg-slate-50 rounded-2xl overflow-hidden shadow-sm">
-                                    <img src="{{ $item->product->image_path ? asset('storage/' . $item->product->image_path) : 'https://via.placeholder.com/150' }}" 
-                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
-                                </div>
-                                <div class="text-left">
-                                    <p class="font-black text-slate-900 text-lg leading-tight">{{ $item->product->name }}</p>
-                                    @if($item->variation)
-                                        <span class="inline-block mt-1 px-3 py-1 bg-sky-50 text-sky-500 text-[10px] font-bold uppercase rounded-lg border border-sky-100">
-                                            {{ $item->variation->variation_name }}
-                                        </span>
-                                    @endif
-                                    <p class="text-sm text-slate-400 mt-2 font-medium italic">Quantity: {{ $item->quantity }} units</p>
-                                </div>
-                            </div>
-                            <div class="text-right mt-4 md:mt-0">
-                                <p class="text-xl font-black text-slate-900">Rp {{ number_format($item->price_at_purchase * $item->quantity, 0, ',', '.') }}</p>
-                                <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Rp {{ number_format($item->price_at_purchase, 0, ',', '.') }} / unit</p>
-                            </div>
+        {{-- Right Column: Side Hub --}}
+        <div class="space-y-10 text-left">
+            {{-- Customer Details Hub --}}
+            <div class="reveal-section bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100" style="transition-delay: 200ms">
+                <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] mb-8 text-left">Client Identity</h3>
+                <div class="space-y-6">
+                    <div class="flex items-center p-5 bg-slate-50 rounded-3xl border border-slate-100 shadow-inner group hover:bg-white transition-all text-left">
+                        <div class="w-14 h-14 bg-indigo-600 text-white rounded-2xl flex items-center justify-center font-black text-xl shadow-xl shadow-indigo-100 mr-5 shrink-0 group-hover:scale-110 transition-transform">
+                            {{ substr($order->user->name, 0, 1) }}
                         </div>
-                        @endforeach
+                        <div class="truncate text-left">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 text-left">Account Name</p>
+                            <p class="font-black text-slate-800 text-base truncate text-left">{{ $order->user->name }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center p-5 bg-slate-50 rounded-3xl border border-slate-100 shadow-inner group hover:bg-white transition-all text-left">
+                        <div class="w-14 h-14 bg-white text-slate-400 rounded-2xl flex items-center justify-center border border-slate-100 shadow-sm mr-5 shrink-0 text-left">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        </div>
+                        <div class="truncate text-left">
+                            <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 text-left">Direct Mail</p>
+                            <p class="font-black text-slate-800 text-sm truncate text-left">{{ $order->user->email }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {{-- Sidebar: Customer & Summary --}}
-            <div class="space-y-8 text-left">
-                {{-- Customer Details --}}
-                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
-                    <h3 class="text-xl font-black text-slate-900 mb-6">Customer Details</h3>
-                    <div class="space-y-4">
-                        <div class="flex items-center p-4 bg-slate-50 rounded-2xl">
-                            <div class="w-10 h-10 bg-sky-500 text-white rounded-full flex items-center justify-center font-bold mr-4">
-                                {{ substr($order->user->name, 0, 1) }}
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest leading-none">Name</p>
-                                <p class="font-bold text-slate-800">{{ $order->user->name }}</p>
-                            </div>
-                        </div>
-                        <div class="flex items-center p-4 bg-slate-50 rounded-2xl">
-                            <div class="w-10 h-10 bg-slate-200 text-slate-500 rounded-full flex items-center justify-center mr-4">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest leading-none">Email</p>
-                                <p class="font-bold text-slate-800 lowercase">{{ $order->user->email }}</p>
-                            </div>
-                        </div>
+            {{-- Order Summary Hub --}}
+            <div class="reveal-section bg-slate-900 p-10 rounded-[3rem] shadow-2xl text-white relative overflow-hidden text-left" style="transition-delay: 350ms">
+                <div class="absolute -top-20 -right-20 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl text-left"></div>
+                
+                <h3 class="text-[10px] font-black text-indigo-300 uppercase tracking-[0.4em] mb-10 relative">Order Summary</h3>
+                
+                <div class="space-y-4 pb-8 border-b border-white/5 relative text-left">
+                    <div class="flex justify-between items-center text-left">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest text-left">Timestamp</span>
+                        <span class="font-black text-white tracking-tight">{{ $order->order_date->format('d M, Y') }}</span>
                     </div>
                 </div>
+                
+                <div class="py-10 relative text-left">
+                    <p class="text-indigo-400 text-[10px] font-black uppercase tracking-[0.3em] mb-3 text-left">Grand Logistics Total</p>
+                    <p class="text-4xl font-black tracking-tighter text-left">Rp{{ number_format($order->total_amount, 0, ',', '.') }}</p>
+                </div>
 
-                {{-- Order Summary & Update --}}
-                <div class="bg-slate-900 p-8 rounded-[2.5rem] shadow-2xl text-white relative overflow-hidden">
-                    <div class="absolute -top-20 -right-20 w-48 h-48 bg-sky-500/10 rounded-full blur-3xl"></div>
-                    
-                    <h3 class="text-xl font-black mb-6">Order Summary</h3>
-                    <div class="space-y-3 pb-6 border-b border-slate-800">
-                        <div class="flex justify-between text-slate-400 text-sm">
-                            <span>Order Date</span>
-                            <span class="font-bold text-white">{{ $order->order_date->format('d M Y') }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="py-6">
-                        <p class="text-sky-400 text-xs font-bold uppercase tracking-widest">Total Bill</p>
-                        <p class="text-4xl font-black mt-1">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</p>
-                    </div>
-
-                    {{-- Update Status Form --}}
-                    <form action="{{ route('admin.orders.update', $order) }}" method="POST" class="mt-4 pt-6 border-t border-slate-800">
-                        @csrf
-                        <label for="status" class="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 text-left">Update Delivery Status</label>
-                        <div class="flex flex-col space-y-3">
+                {{-- Update Status Hub --}}
+                <form action="{{ route('admin.orders.update', $order) }}" method="POST" class="relative mt-2 pt-8 border-t border-white/5 text-left">
+                    @csrf
+                    <label for="status" class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4 ml-1 text-left">Update Shipping Logic</label>
+                    <div class="space-y-4 text-left">
+                        <div class="relative text-left">
                             <select name="status" id="status" 
-                                    class="w-full px-5 py-3 bg-slate-800 border-none rounded-xl focus:ring-2 focus:ring-sky-500 text-white font-bold text-sm transition-all appearance-none cursor-pointer">
-                                <option value="pending" @if($order->status == 'pending') selected @endif>Pending</option>
-                                <option value="completed" @if($order->status == 'completed') selected @endif>Completed</option>
-                                <option value="cancelled" @if($order->status == 'cancelled') selected @endif>Cancelled</option>
+                                    class="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl focus:ring-2 focus:ring-indigo-500 text-white font-black text-xs uppercase tracking-widest appearance-none cursor-pointer text-left">
+                                <option value="pending" class="bg-slate-900" @if($order->status == 'pending') selected @endif>Pending</option>
+                                <option value="completed" class="bg-slate-900" @if($order->status == 'completed') selected @endif>Completed</option>
+                                <option value="cancelled" class="bg-slate-900" @if($order->status == 'cancelled') selected @endif>Cancelled</option>
                             </select>
-                            <button type="submit" 
-                                    class="w-full bg-sky-500 hover:bg-sky-400 text-white font-black py-4 rounded-xl transition-all shadow-lg shadow-sky-500/20 active:scale-95">
-                                Update Status
-                            </button>
+                            <div class="absolute inset-y-0 right-5 flex items-center pointer-events-none text-white/30 text-left">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"/></svg>
+                            </div>
                         </div>
-                    </form>
-                </div>
+                        <button type="submit" 
+                                class="w-full bg-indigo-600 hover:bg-white hover:text-slate-950 text-white font-black py-5 rounded-[1.5rem] transition-all shadow-xl shadow-indigo-500/20 active:scale-95 text-[10px] uppercase tracking-[0.2em] flex justify-center items-center">
+                            Deploy Update
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 @endsection
